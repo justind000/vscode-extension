@@ -61,12 +61,12 @@ async function createServer(
     const clientOptions: LanguageClientOptions = {
         // Register the server for python documents
         documentSelector: isVirtualWorkspace()
-            ? [{ language: 'python' }]
+            ? [{ language: 'ato' }]
             : [
-                  { scheme: 'file', language: 'python' },
-                  { scheme: 'untitled', language: 'python' },
-                  { scheme: 'vscode-notebook', language: 'python' },
-                  { scheme: 'vscode-notebook-cell', language: 'python' },
+                  { scheme: 'file', language: 'ato' },
+                  { scheme: 'untitled', language: 'ato' },
+                  { scheme: 'vscode-notebook', language: 'ato' },
+                  { scheme: 'vscode-notebook-cell', language: 'ato' },
               ],
         outputChannel: outputChannel,
         traceOutputChannel: outputChannel,
