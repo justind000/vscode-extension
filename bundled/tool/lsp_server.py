@@ -41,6 +41,7 @@ import lsp_utils as utils
 import lsprotocol.types as lsp
 from pygls import server, uris, workspace
 
+
 WORKSPACE_SETTINGS = {}
 GLOBAL_SETTINGS = {}
 RUNNER = pathlib.Path(__file__).parent / "lsp_runner.py"
@@ -87,27 +88,44 @@ TOOL_ARGS = []  # default arguments always passed to your tool.
 #  See `pylint` implementation for a full featured linter extension:
 #  Pylint: https://github.com/microsoft/vscode-pylint/blob/main/bundled/tool
 
+@LSP_SERVER.feature(lsp.TEXT_DOCUMENT_COMPLETION, lsp.CompletionOptions(trigger_characters=["."], all_commit_characters=[":"]),)
+def completions(params: Optional[lsp.CompletionParams] = None) -> lsp.CompletionList:
+    """Handler for completion requests."""
+    document = LSP_SERVER.workspace.get_text_document(params.text_document.uri)
+    utils.cursor_word(document, params.position)
+    log_always(utils.cursor_word(document, params.position))
+    # match currently typed word from cursor_word return
+    # fill items with completions and return
+    # items = []
+    items = [
+            lsp.CompletionItem(label="item 1", kind=lsp.CompletionItemKind.Interface),
+            lsp.CompletionItem(label="item 2"),
+        ]
+    return lsp.CompletionList(is_incomplete=False, items=items)
+
 @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DID_CHANGE)
 def did_open(params: lsp.DidChangeTextDocumentParams) -> None:
     """LSP handler for textDocument/didOpen request."""
-    #document = LSP_SERVER.workspace.get_text_document(params.text_document.uri)
-    #diagnostics: list[lsp.Diagnostic] = _linting_helper(document)
-    #LSP_SERVER.publish_diagnostics(document.uri, diagnostics)
-    log_always("did change")
+    document = LSP_SERVER.workspace.get_text_document(params.text_document.uri)
+
+    # naive method to real-time lint on every keypress
+    _linting_helper(document)
 
 @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DID_OPEN)
 def did_open(params: lsp.DidOpenTextDocumentParams) -> None:
     """LSP handler for textDocument/didOpen request."""
-    #document = LSP_SERVER.workspace.get_text_document(params.text_document.uri)
-    #diagnostics: list[lsp.Diagnostic] = _linting_helper(document)
-    #LSP_SERVER.publish_diagnostics(document.uri, diagnostics)
+    document = LSP_SERVER.workspace.get_text_document(params.text_document.uri)
+
+    # lint on file open
+    diagnostics: list[lsp.Diagnostic] = _linting_helper(document)
+    LSP_SERVER.publish_diagnostics(document.uri, diagnostics)
     log_always("did open")
 
 
 @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DID_SAVE)
 def did_save(params: lsp.DidSaveTextDocumentParams) -> None:
     """LSP handler for textDocument/didSave request."""
-   # document = LSP_SERVER.workspace.get_text_document(params.text_document.uri)
+    #document = LSP_SERVER.workspace.get_text_document(params.text_document.uri)
     #diagnostics: list[lsp.Diagnostic] = _linting_helper(document)
     #LSP_SERVER.publish_diagnostics(document.uri, diagnostics)
     log_to_output("did save")
@@ -128,8 +146,11 @@ def _linting_helper(document: workspace.Document) -> list[lsp.Diagnostic]:
     # _run_tool_on_document and _run_tool functions as needed for your project.
     
     # result = _run_tool_on_document(document)
+    # return _parse_output_using_regex(result.stdout) if result.stdout else []
 
-    return #_parse_output_using_regex(result.stdout) if result.stdout else []
+    # this is the flake8 output specified below mocked for testing
+    result = "3,21,F,F401:'mismatched input ' ' expecting {'from', ':'}'"
+    return _parse_output_using_regex(result) if result else []
 
 
 # TODO: If your linter outputs in a known format like JSON, then parse
@@ -140,7 +161,7 @@ def _linting_helper(document: workspace.Document) -> list[lsp.Diagnostic]:
 # TOOL_ARGS += ["--format='%(row)d,%(col)d,%(code).1s,%(code)s:%(text)s'"]
 # DIAGNOSTIC_RE =
 #    r"(?P<line>\d+),(?P<column>-?\d+),(?P<type>\w+),(?P<code>\w+\d+):(?P<message>[^\r\n]*)"
-DIAGNOSTIC_RE = re.compile(r"")
+DIAGNOSTIC_RE = re.compile(r"(?P<line>\d+),(?P<column>-?\d+),(?P<type>\w+),(?P<code>\w+\d+):(?P<message>[^\r\n]*)")
 
 
 def _parse_output_using_regex(content: str) -> list[lsp.Diagnostic]:
@@ -187,7 +208,7 @@ def _parse_output_using_regex(content: str) -> list[lsp.Diagnostic]:
 def _get_severity(*_codes: list[str]) -> lsp.DiagnosticSeverity:
     # TODO: All reported issues from linter are treated as warning.
     # change it as appropriate for your linter.
-    return lsp.DiagnosticSeverity.Warning
+    return lsp.DiagnosticSeverity.Error
 
 
 # **********************************************************

@@ -12,12 +12,61 @@ import site
 import subprocess
 import sys
 import threading
+import re
 from typing import Any, Callable, List, Sequence, Tuple, Union
+from pygls.workspace import Document
+import lsprotocol.types as lsp_types
 
 # Save the working directory used when loading this module
 SERVER_CWD = os.getcwd()
 CWD_LOCK = threading.Lock()
 
+def document_line(document: Document, line: int, keepends: bool = False) -> str:
+    """Return the line of the document."""
+    try:
+        line_str = document.source.splitlines(keepends)[line]
+    except IndexError:
+        return ""
+    return line_str
+
+def range_from_coords(x: tuple[int, int], y: tuple[int, int]) -> lsp_types.Range:
+    """Helper function to create a range from coordinates.
+
+    NOTE: If any of the coordinates is negative, truncate it to 0."""
+    return lsp_types.Range(
+        start=lsp_types.Position(line=max(0, x[0]), character=max(0, x[1])),
+        end=lsp_types.Position(line=max(0, y[0]), character=max(0, y[1])),
+    )
+
+def cursor_line(document: Document, position: lsp_types.Position, keepends: bool = False) -> str:
+    """Return the line the cursor is on."""
+    return document_line(document, position.line, keepends=keepends)
+
+def cursor_word(
+    document: Document, position: lsp_types.Position, include_all: bool = True
+) -> str | None:
+    """Return the word under the cursor."""
+    res = cursor_word_and_range(document, position, include_all=include_all)
+    if res:
+        return res[0]
+    return None
+
+
+def cursor_word_and_range(
+    document: Document, position: lsp_types.Position, include_all: bool = True
+) -> tuple[str, lsp_types.Range] | None:
+    """Return the word and its range under the cursor."""
+    line = cursor_line(document, position)
+    cursor = position.character
+    for m in re.finditer(r"[\w$*.()\/\\#:]+", line):
+        end = m.end() if include_all else cursor
+        if m.start() <= cursor <= m.end():
+            word = (
+                line[m.start() : end],
+                range_from_coords((position.line, m.start()), (position.line, end)),
+            )
+            return word
+    return None
 
 def as_list(content: Union[Any, List[Any], Tuple[Any]]) -> Union[List[Any], Tuple[Any]]:
     """Ensures we always get a list"""
