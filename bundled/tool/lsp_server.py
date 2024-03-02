@@ -87,29 +87,38 @@ TOOL_ARGS = []  # default arguments always passed to your tool.
 #  See `pylint` implementation for a full featured linter extension:
 #  Pylint: https://github.com/microsoft/vscode-pylint/blob/main/bundled/tool
 
+@LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DID_CHANGE)
+def did_open(params: lsp.DidChangeTextDocumentParams) -> None:
+    """LSP handler for textDocument/didOpen request."""
+    #document = LSP_SERVER.workspace.get_text_document(params.text_document.uri)
+    #diagnostics: list[lsp.Diagnostic] = _linting_helper(document)
+    #LSP_SERVER.publish_diagnostics(document.uri, diagnostics)
+    log_always("did change")
 
 @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DID_OPEN)
 def did_open(params: lsp.DidOpenTextDocumentParams) -> None:
     """LSP handler for textDocument/didOpen request."""
-    document = LSP_SERVER.workspace.get_document(params.text_document.uri)
-    diagnostics: list[lsp.Diagnostic] = _linting_helper(document)
-    LSP_SERVER.publish_diagnostics(document.uri, diagnostics)
+    #document = LSP_SERVER.workspace.get_text_document(params.text_document.uri)
+    #diagnostics: list[lsp.Diagnostic] = _linting_helper(document)
+    #LSP_SERVER.publish_diagnostics(document.uri, diagnostics)
+    log_always("did open")
 
 
 @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DID_SAVE)
 def did_save(params: lsp.DidSaveTextDocumentParams) -> None:
     """LSP handler for textDocument/didSave request."""
-    document = LSP_SERVER.workspace.get_document(params.text_document.uri)
-    diagnostics: list[lsp.Diagnostic] = _linting_helper(document)
-    LSP_SERVER.publish_diagnostics(document.uri, diagnostics)
-
+   # document = LSP_SERVER.workspace.get_text_document(params.text_document.uri)
+    #diagnostics: list[lsp.Diagnostic] = _linting_helper(document)
+    #LSP_SERVER.publish_diagnostics(document.uri, diagnostics)
+    log_to_output("did save")
 
 @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DID_CLOSE)
 def did_close(params: lsp.DidCloseTextDocumentParams) -> None:
     """LSP handler for textDocument/didClose request."""
-    document = LSP_SERVER.workspace.get_document(params.text_document.uri)
+    #document = LSP_SERVER.workspace.get_text_document(params.text_document.uri)
     # Publishing empty diagnostics to clear the entries for this file.
-    LSP_SERVER.publish_diagnostics(document.uri, [])
+    #LSP_SERVER.publish_diagnostics(document.uri, [])
+    log_to_output("did close")
 
 
 def _linting_helper(document: workspace.Document) -> list[lsp.Diagnostic]:
@@ -117,8 +126,10 @@ def _linting_helper(document: workspace.Document) -> list[lsp.Diagnostic]:
     # If you want to support linting on change then your tool will need to
     # support linting over stdin to be effective. Read, and update
     # _run_tool_on_document and _run_tool functions as needed for your project.
-    result = _run_tool_on_document(document)
-    return _parse_output_using_regex(result.stdout) if result.stdout else []
+    
+    # result = _run_tool_on_document(document)
+
+    return #_parse_output_using_regex(result.stdout) if result.stdout else []
 
 
 # TODO: If your linter outputs in a known format like JSON, then parse
@@ -468,23 +479,25 @@ def _run_tool_on_document(
         log_to_output(f"CWD Linter: {cwd}")
         # This is needed to preserve sys.path, in cases where the tool modifies
         # sys.path and that might not work for this scenario next time around.
-        with utils.substitute_attr(sys, "path", sys.path[:]):
-            try:
-                # TODO: `utils.run_module` is equivalent to running `python -m atopile`.
-                # If your tool supports a programmatic API then replace the function below
-                # with code for your tool. You can also use `utils.run_api` helper, which
-                # handles changing working directories, managing io streams, etc.
-                # Also update `_run_tool` function and `utils.run_module` in `lsp_runner.py`.
-                result = utils.run_module(
-                    module=TOOL_MODULE,
-                    argv=argv,
-                    use_stdin=use_stdin,
-                    cwd=cwd,
-                    source=document.source,
-                )
-            except Exception:
-                log_error(traceback.format_exc(chain=True))
-                raise
+
+        # with utils.substitute_attr(sys, "path", sys.path[:]):
+        #     try:
+        #         # TODO: `utils.run_module` is equivalent to running `python -m atopile`.
+        #         # If your tool supports a programmatic API then replace the function below
+        #         # with code for your tool. You can also use `utils.run_api` helper, which
+        #         # handles changing working directories, managing io streams, etc.
+        #         # Also update `_run_tool` function and `utils.run_module` in `lsp_runner.py`.
+        #         result = utils.run_module(
+        #             module=TOOL_MODULE,
+        #             argv=argv,
+        #             use_stdin=use_stdin,
+        #             cwd=cwd,
+        #             source=document.source,
+        #         )
+        #     except Exception:
+        #         log_error(traceback.format_exc(chain=True))
+        #         raise
+
         if result.stderr:
             log_to_output(result.stderr)
 
