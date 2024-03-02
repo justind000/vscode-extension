@@ -1,30 +1,29 @@
 {
-    "name": "<pytool-module>",
-    "displayName": "<pytool-display-name>",
-    "description": "Linting support for python files using `<pytool-module>`.",
+    "name": "atopile",
+    "displayName": "atopile compiler",
+    "description": "IDE support for atopile.",
     "version": "2022.0.0-dev",
     "preview": true,
     "serverInfo": {
-        "name": "<pytool-display-name>",
-        "module": "<pytool-module>"
+        "name": "atopile compiler",
+        "module": "atopile"
     },
-    "publisher": "<my-publisher>",
-    "license": "MIT",
-    "homepage": "https://github.com/<my-github>/<my-extension-project>",
+    "publisher": "atopile",
+    "license": "Apache-2.0",
+    "homepage": "https://github.com/atopile/vscode-extension",
     "repository": {
         "type": "git",
-        "url": "https://github.com/<my-github>/<my-extension-project>.git"
+        "url": "https://github.com/atopile/vscode-extension.git"
     },
     "bugs": {
-        "url": "https://github.com/<my-github>/<my-extension-project>/issues"
+        "url": "https://github.com/atopile/vscode-extension/issues"
     },
     "galleryBanner": {
         "color": "#1e415e",
         "theme": "dark"
     },
     "keywords": [
-        "python",
-        "<pytool-module>"
+        "atopile"
     ],
     "engines": {
         "vscode": "^1.78.0"
@@ -40,12 +39,12 @@
     "capabilities": {
         "virtualWorkspaces": {
             "supported": false,
-            "description": "Virtual Workspaces are not supported with <pytool-display-name>."
+            "description": "Virtual Workspaces are not supported with atopile compiler."
         }
     },
     "activationEvents": [
-        "onLanguage:python",
-        "workspaceContains:*.py"
+        "onLanguage:atopile",
+        "workspaceContains:*.ato"
     ],
     "main": "./dist/extension.js",
     "scripts": {
@@ -59,12 +58,12 @@
         "lint": "eslint src --ext ts",
         "format-check": "prettier --check 'src/**/*.ts' 'build/**/*.yml' '.github/**/*.yml'",
         "test": "node ./out/test/runTest.js",
-        "vsce-package": "vsce package -o <pytool-module>.vsix"
+        "vsce-package": "vsce package -o atopile.vsix"
     },
     "contributes": {
         "configuration": {
             "properties": {
-                "<pytool-module>.args": {
+                "atopile.args": {
                     "default": [],
                     "description": "Arguments passed in. Each argument is a separate item in the array.",
                     "items": {
@@ -73,30 +72,30 @@
                     "scope": "resource",
                     "type": "array"
                 },
-                "<pytool-module>.path": {
+                "atopile.path": {
                     "default": [],
-                    "description": "When set to a path to <pytool-module> binary, extension will use that. NOTE: Using this option may slowdown server response time.",
+                    "description": "When set to a path to atopile binary, extension will use that. NOTE: Using this option may slowdown server response time.",
                     "scope": "resource",
                     "items": {
                         "type": "string"
                     },
                     "type": "array"
                 },
-                "<pytool-module>.importStrategy": {
+                "atopile.importStrategy": {
                     "default": "useBundled",
-                    "description": "Defines where `<pytool-module>` is imported from. This setting may be ignored if `<pytool-module>.path` is set.",
+                    "description": "Defines where `atopile` is imported from. This setting may be ignored if `atopile.path` is set.",
                     "enum": [
                         "useBundled",
                         "fromEnvironment"
                     ],
                     "enumDescriptions": [
-                        "Always use the bundled version of `<pytool-module>`.",
-                        "Use `<pytool-module>` from environment, fallback to bundled version only if `<pytool-module>` not available in the environment."
+                        "Always use the bundled version of `atopile`.",
+                        "Use `atopile` from environment, fallback to bundled version only if `atopile` not available in the environment."
                     ],
                     "scope": "window",
                     "type": "string"
                 },
-                "<pytool-module>.interpreter": {
+                "atopile.interpreter": {
                     "default": [],
                     "description": "When set to a path to python executable, extension will use that to launch the server and any subprocess.",
                     "scope": "resource",
@@ -105,7 +104,7 @@
                     },
                     "type": "array"
                 },
-                "<pytool-module>.showNotifications": {
+                "atopile.showNotifications": {
                     "default": "off",
                     "description": "Controls when notifications are shown by this extension.",
                     "enum": [
@@ -128,8 +127,28 @@
         "commands": [
             {
                 "title": "Restart Server",
-                "category": "<pytool-display-name>",
-                "command": "<pytool-module>.restart"
+                "category": "atopile compiler",
+                "command": "atopile.restart"
+            }
+        ],
+        "languages": [
+            {
+                "id": "ato",
+                "aliases": [
+                    "atopile",
+                    "ato"
+                ],
+                "extensions": [
+                    ".ato"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "ato",
+                "scopeName": "source.ato",
+                "path": "./syntaxes/ato.tmLanguage.json"
             }
         ]
     },
