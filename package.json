@@ -121,7 +121,14 @@
                     ],
                     "scope": "machine",
                     "type": "string"
+                },
+                "conf.ato.venv": {
+                    "type": "string",
+                    "description": "Python virtual environment"
                 }
+            },
+            "default": {
+                "conf.ato.venv": ""
             }
         },
         "commands": [
@@ -129,6 +136,42 @@
                 "title": "Restart Server",
                 "category": "atopile compiler",
                 "command": "atopile.restart"
+            },
+            {
+                "command": "atopile.create",
+                "title": "Ato Create",
+                "category": "ato",
+                "when": "editorLangId == ato"
+            },
+            {
+                "command": "atopile.build",
+                "title": "Build",
+                "category": "ato",
+                "when": "editorLangId == ato"
+            },
+            {
+                "command": "atopile.install",
+                "title": "Install JLCPCB Component",
+                "category": "ato",
+                "when": "editorLangId == ato"
+            },
+            {
+                "command": "atopile.install_package",
+                "title": "Install Package",
+                "category": "ato",
+                "when": "editorLangId == ato"
+            },
+            {
+                "command": "atopile.venv",
+                "title": "Set Virtual Environment",
+                "category": "ato",
+                "when": "editorLangId == ato"
+            },
+            {
+                "command": "atopile.choose_build",
+                "title": "Choose build target",
+                "category": "ato",
+                "when": "editorLangId == ato"
             }
         ],
         "languages": [
@@ -155,7 +198,8 @@
     "dependencies": {
         "@vscode/python-extension": "^1.0.5",
         "fs-extra": "^11.2.0",
-        "vscode-languageclient": "^8.1.0"
+        "vscode-languageclient": "^8.1.0",
+        "js-yaml": "^4.1.0"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
@@ -172,6 +216,8 @@
         "typescript": "^5.3.3",
         "ts-loader": "^9.5.1",
         "webpack": "^5.90.3",
-        "webpack-cli": "^5.1.4"
+        "webpack-cli": "^5.1.4",
+        "@types/js-yaml": "^4.0.9",
+        "@types/mocha": "^10.0.6"
     }
 }
