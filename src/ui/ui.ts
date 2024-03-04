@@ -17,6 +17,7 @@ interface AtoYaml {
     };
     dependencies: string[];
 }
+const atopileInterpreterSetting = 'atopile.interpreter';
 
 async function atoBuild() {
     // save all dirty editors
@@ -24,7 +25,7 @@ async function atoBuild() {
 
     // get the command to start the python venv
     const configuration = vscode.workspace.getConfiguration();
-    let venvCommandLine: any = configuration.get<{}>('conf.ato.venv');
+    let venvCommandLine: any = configuration.get<{}>(atopileInterpreterSetting);
 
     // create a terminal to work with
     let buildTerminal = vscode.window.createTerminal({
@@ -33,12 +34,12 @@ async function atoBuild() {
         hideFromUser: false,
     });
 
-    if (!venvCommandLine) {
-        venvCommandLine = await processVenv();
+    if (!venvCommandLine[0]) {
+        venvCommandLine[0] = await processVenv();
     }
 
     // send commands
-    buildTerminal.sendText(venvCommandLine);
+    buildTerminal.sendText(venvCommandLine[0]);
 
     // parse what build target to use
     let buildArray: string[] = statusbarAtoBuildTarget.text.split('-');
@@ -54,7 +55,7 @@ async function atoBuild() {
 
 async function atoCreate() {
     const configuration = vscode.workspace.getConfiguration();
-    let venvCommandLine: any = configuration.get<{}>('conf.ato.venv');
+    let venvCommandLine: any = configuration.get<{}>(atopileInterpreterSetting);
 
     let createTerminal = vscode.window.createTerminal({
         name: 'ato Create',
@@ -62,18 +63,18 @@ async function atoCreate() {
         hideFromUser: false,
     });
 
-    if (!venvCommandLine) {
-        venvCommandLine = await processVenv();
+    if (!venvCommandLine[0]) {
+        venvCommandLine[0] = await processVenv();
     }
 
-    createTerminal.sendText(venvCommandLine);
+    createTerminal.sendText(venvCommandLine[0]);
     createTerminal.sendText('ato create');
     createTerminal.show();
 }
 
 async function processInstallJlcpcb() {
     const configuration = vscode.workspace.getConfiguration();
-    let venvCommandLine: any = configuration.get<{}>('conf.ato.venv');
+    let venvCommandLine: any = configuration.get<{}>(atopileInterpreterSetting);
 
     let result = await window.showInputBox({
         placeHolder: 'JLCPCB Component ID',
@@ -89,11 +90,11 @@ async function processInstallJlcpcb() {
             hideFromUser: false,
         });
 
-        if (!venvCommandLine) {
-            venvCommandLine = await processVenv();
+        if (!venvCommandLine[0]) {
+            venvCommandLine[0] = await processVenv();
         }
 
-        installTerminal.sendText(venvCommandLine);
+        installTerminal.sendText(venvCommandLine[0]);
         installTerminal.sendText('ato install --jlcpcb ' + result);
         installTerminal.show();
     }
@@ -108,7 +109,7 @@ async function processVenv() {
 
     // if we got a string, save it
     if (result) {
-        await vscode.workspace.getConfiguration().update('conf.ato.venv', result, vscode.ConfigurationTarget.Workspace);
+        await vscode.workspace.getConfiguration().update(atopileInterpreterSetting, [result], vscode.ConfigurationTarget.Workspace);
     }
 
     return result;
@@ -116,7 +117,7 @@ async function processVenv() {
 
 async function processInstallPackage() {
     const configuration = vscode.workspace.getConfiguration();
-    const venvCommandLine: any = configuration.get<{}>('conf.ato.venv');
+    const venvCommandLine: any = configuration.get<{}>(atopileInterpreterSetting);
     let result = await window.showInputBox({
         placeHolder: 'Package name',
     });
@@ -130,7 +131,7 @@ async function processInstallPackage() {
             cwd: '${workspaceFolder}',
             hideFromUser: false,
         });
-        installTerminal.sendText(venvCommandLine);
+        installTerminal.sendText(venvCommandLine[0]);
         installTerminal.sendText('ato install ' + result);
         installTerminal.show();
     }
