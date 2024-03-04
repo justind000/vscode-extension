@@ -121,14 +121,7 @@
                     ],
                     "scope": "machine",
                     "type": "string"
-                },
-                "conf.ato.venv": {
-                    "type": "string",
-                    "description": "Python virtual environment"
                 }
-            },
-            "default": {
-                "conf.ato.venv": ""
             }
         },
         "commands": [
